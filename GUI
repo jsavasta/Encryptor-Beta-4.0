@@ -1,0 +1,502 @@
+/**
+ * Co-Authored by Joey Savastano and Dominic King
+ * The GUI class is the graphics the user interacts with. It class methods from the 
+ * Encrypt and Decrypt classes and then displays the decrypted and encrypted data. 
+ */
+package thiss;
+import javax.swing.*;
+import java.awt.datatransfer.*;
+import java.io.*;
+import java.awt.Checkbox;
+import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.GridLayout;
+import java.awt.event.*;
+public class GUI extends JFrame implements ActionListener, ItemListener
+{
+	JTextField input, output;
+	JPanel panel;
+	JFrame gui;
+	JRadioButton encrypt, decrypt;
+	JLabel in, out, rate, name;
+	JButton clear, run, copy, paste, close;
+	Checkbox check;
+	String[] acceptNums = new String[] {"1", "2", "3", "4", "" +
+			"5", "6", "7", "8", "9", "0", "-", "+"};
+	String einput, text, cont, inputText;
+	Encrypt enc = new Encrypt();
+	Decrypt dec = new Decrypt();
+	GridLayout grid = new GridLayout(7,3);
+	ButtonGroup type;
+	boolean canEncrypt, canDecrypt, numPass, wordPass, on, end;
+	static final long serialVersionUID = 1L;
+	int num, val, lowc, capc, symc, numc, rep, ordnumc, cp, cp2, nameIt;
+	double ave;
+	char c;
+	/**
+	 * Constructs the GUI and sets the close operation and visibility. 
+	 */
+	GUI()
+	{
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setVisible(true);
+		init();
+	}
+	/**
+	 * Calls the methods for the set-up and building of all the parts of the interface.
+	 */
+	void init()
+	{
+		end = false;
+		on = false;
+		type = new ButtonGroup();
+		textSetUp();
+		radioButtonSetUp();
+		buttonSetUp();
+		checkBoxSetUp();
+		panelSetUp();
+		pack();
+		input.setText("");
+		passStrength();
+		gui = new JFrame();
+	}
+	/**
+	 * Creates the JTextFields and JLabel with the proper parameters. 
+	 */
+	public void textSetUp()
+	{
+		input = new JTextField(10);
+		in = new JLabel("Input:", JLabel.CENTER);
+		out = new JLabel("Output:", JLabel.CENTER);
+		rate = new JLabel("");
+		output = new JTextField(10);
+		name = new JLabel("");
+	}
+	/**
+	 * Creates the JPanel. Adds all the components to the JPanel.
+	 */
+	public void panelSetUp()
+	{
+		panel = new JPanel(grid);
+		grid.setHgap(20);
+		panel.add(in);
+		panel.add(input);
+		panel.add(check);
+		panel.add(rate);
+		panel.add(out);
+		panel.add(output);
+		panel.add(encrypt);
+		panel.add(decrypt);
+		panel.add(run);
+		panel.add(clear);
+		panel.add(copy);
+		panel.add(paste);
+		panel.add(close);
+		grid.setVgap(10);
+		this.add(panel);
+	}
+	/**
+	 * Creates the Checkbox.
+	 */
+	public void checkBoxSetUp()
+	{
+		check = new Checkbox("Check My Password:");
+		check.addItemListener(this);
+	}
+	/**
+	 * Creates the JRadioButtons and adds the ItemListener to the buttons.
+	 */
+	public void radioButtonSetUp()
+	{
+		encrypt = new JRadioButton("Encrypt");
+		decrypt = new JRadioButton("Decrypt");
+		encrypt.addItemListener(this);
+		decrypt.addItemListener(this);
+		type.add(encrypt);
+		type.add(decrypt);
+	} 
+	/**
+	 * Creates the JButtons with the proper parameters and adds ActionLsiteners to 
+	 * all of them. 
+	 */
+	public void buttonSetUp()
+	{
+		run = new JButton("Run");
+		clear = new JButton("Clear");
+		copy = new JButton("Copy Data");
+		paste = new JButton("Paste Data");
+		close = new JButton("Close");
+		close.addActionListener(this);
+		paste.addActionListener(this);
+		copy.addActionListener(this);
+		clear.addActionListener(this);
+		run.addActionListener(this);
+	}
+	/**
+	 * Algorithm that checks the strength of the password input. Adds points to the
+	 * value based on lower case, upper case, characters, and numbers. 
+	 */
+	public void passStrength()
+	{
+		while(on && !end)
+		{
+			inputText = input.getText();
+			if(end)
+			{
+				return;
+			}
+			if(!check.getState())
+			{
+				rate.setText("");
+				on = false;
+				passStrength();
+				return;
+			}
+			if(inputText != null && inputText != "")
+			{
+				val = inputText.length()*4;
+				cp = 0;
+				cp2 = 0;
+				rep = 0;
+				ordnumc = 0;
+				for (int l = 0; l < inputText.length(); l++)
+				{
+					int  cp = inputText.codePointAt(l);
+					if (cp == cp2)
+						rep+=1;
+					if ((cp - cp2) == 1)
+						ordnumc+=1;
+					//numbers
+					if (cp > 47 && cp < 59)
+					{
+						numc += 1;
+					}
+					//symbols
+					if (cp > 32 && cp < 48 || cp > 57 && cp < 65 || 
+							cp > 90 && cp < 97 || cp > 122)
+					{
+						symc+= 1;
+					}
+					//caps
+					if (cp > 64  && cp < 91)
+					{
+						capc+= 1;
+					}
+					//lowercase
+					if (cp > 96 && cp < 123)
+					{
+						lowc+=1;
+					}
+					cp2 = cp;
+				}
+				if (inputText.length() < 4)
+					val-=20;
+				if (numc > 2)
+					val += 5;
+				if (symc > 1)
+					val += 5;
+				if (capc > 0 && lowc > 0)
+					val+= 10;
+				if (numc > 0 && symc > 0)
+					val += 15;
+				if (numc == 0 && symc == 0 && inputText.length() > 5)
+					val-=10;
+				if (symc == 0 && lowc == 0 && capc ==0 && inputText.length() > 8)
+					val-=10;
+				if (rep > 1)
+					val -= (rep*4);
+				if (ordnumc > 0)
+					val -= (ordnumc*3);
+				numc = 0;
+				symc = 0;
+				capc = 0;
+				lowc = 0;
+				num = inputText.length();
+				if(inputText.equalsIgnoreCase("Dillon"))
+				{
+					Color color = new Color(255,0,255);
+					rate.setForeground(color);
+					rate.setText("Growl");
+				}
+				else if(inputText.equalsIgnoreCase("Joey")||
+						inputText.equalsIgnoreCase("Nick"))
+				{
+					in.setText("Joey");
+					out.setText("Nick");
+
+					Color color = new Color(218,165,32);
+					rate.setForeground(color);
+					rate.setText("God Tier");
+				}
+				else if(num == 0)
+					rate.setText("");
+				else if (val > 99)
+				{
+					Color color = new Color(0,150,0);
+					rate.setForeground(color);
+					rate.setText("Extreme");
+				}
+				else if(val > 54 && ave < 100)
+				{
+					Color color = new Color(0,100,0);
+					rate.setForeground(color);
+					rate.setText("Strong");
+				}
+				else if(val > 20 && val < 55)
+				{
+					rate.setForeground(Color.ORANGE);
+					rate.setText("Medium");
+				}
+				else if(val > 0 && val < 19)
+				{
+					rate.setForeground(Color.RED);
+					rate.setText("Weak");
+				}
+				val = 0;
+			}
+		}
+		while(!on && !end)
+		{
+			in.setText("Input:");
+			out.setText("Output:");
+			name.setText("");
+			if(end)
+			{
+				return;
+			}
+			if(check.getState())
+			{
+				on = true;
+				passStrength();
+				return;
+			}
+			System.out.print("");
+		}
+	}
+	/**
+	 * Small easter egg that adds our names at the bottom of the panel at a random time.
+	 */
+	public void willWeGetNames()
+	{
+		nameIt = (int) (Math.random() * 1000) - 1;
+		if( nameIt == 123)
+			name.setText("Joey Savastano");
+		else if( nameIt == 55)
+			name.setText("Dominic King");
+		else
+			name.setText("");
+	}
+	/**
+	 * Checks to see if the JRadioButtons have been selected.
+	 */
+	public void itemStateChanged(ItemEvent e)
+	{
+		if(e.getSource() == encrypt)
+		{
+			canEncrypt = true;
+			canDecrypt = false;
+		}
+		if(e.getSource() == decrypt)
+		{
+			canEncrypt = false;
+			canDecrypt = true;
+		}
+	}
+	/**
+	 * Gets the action performed by the JButtons calls the appropriate methods. 
+	 */
+	public void actionPerformed(ActionEvent e)
+	{
+		if(e.getSource() == run)
+		{
+			in.setText("Input:");
+			out.setText("Output:");
+		}
+		if(e.getSource() == close)
+		{
+			clearen();
+			cleardec();
+			allClear();
+			end = true;
+			System.exit(0);
+		}
+		if(e.getSource() == paste)
+			paste();
+		if(e.getSource() == copy)
+			copy();
+		if (e.getSource() == run && canEncrypt == true)
+			encrypt();
+		if (e.getSource() == run && canDecrypt == true)
+			decrypt();
+		if (e.getSource() == clear)
+		{
+			check.setState(false);
+			input.setText("");
+			clearen();
+			cleardec();
+			allClear();
+			in.setText("Input:");
+			out.setText("Output:");
+		}
+		if(e.getSource() == run && !canEncrypt && !canDecrypt)
+			output.setText("Please Select One");
+	}
+	/**
+	 * Contains center easter eggs. Calls the methods from encrypt and then
+	 * displays the encrypted data.
+	 */
+	public void encrypt()
+	{
+		if(input.getText().equalsIgnoreCase("Dillon"))
+		{
+			clearen();
+			cleardec();
+			output.setText("2000");
+		}
+		else if(input.getText().equalsIgnoreCase("Skipper"))
+		{
+			clearen();
+			cleardec();
+			output.setText("All Hail!");
+		}
+		else if(input.getText().equalsIgnoreCase("Nick") || 
+				input.getText().equalsIgnoreCase("Joey"))
+		{
+			clearen();
+			cleardec();
+			output.setText("Is The Best!");
+		}
+		else if(!input.getText().equals(""))
+		{
+			clearen();
+			einput = input.getText();
+			enc.getPass(einput);
+			enc.encPass();
+			enc.printPass();
+			text = enc.pass2;
+			output.setText(text);
+			enc.pass.clear();
+		}
+	}
+	/**
+	 * Calls the decrypt methods and displays the decrpyted data. 
+	 */
+	public void decrypt()
+	{
+		if(!input.getText().equals("") && checkacceptNums())
+		{
+			cleardec();
+			einput = input.getText();
+			dec.getData(einput);
+			dec.numData();
+			dec.roundData();
+			dec.dispData();
+			text = dec.word;
+			output.setText(text);
+		}
+		if(!input.getText().equals("") && !checkacceptNums())
+			output.setText("Numbers Only");
+	}
+	/**
+	 * Clears the Encrypt variables. 
+	 */
+	public void clearen()
+	{
+		output.setText("");
+		text = "";
+		einput = "";
+		enc.pass2 = "";
+		enc.password = "";
+		enc.pass.clear();
+	}
+	/**
+	 * Clears the Decrypt variables. 
+	 */
+	public void cleardec()
+	{
+		output.setText("");
+		text = "";
+		einput = "";
+		dec.encData = "";
+		dec.data.clear();
+		dec.inData.clear();
+		dec.decInData.clear();
+		dec.roundDecInData.clear();
+		dec.decData.clear();
+		dec.last.clear();
+		dec.num = 0;
+		dec.datta = null;
+	}
+	/**
+	 * Clears local variables.
+	 */
+	public void allClear()
+	{
+		type.clearSelection();
+		rate.setText("");
+		canEncrypt = false;
+		canDecrypt = false;
+	}
+	/**
+	 * Copies the text in the JTextArea output to the clipboard.
+	 */
+	public void copy() 
+	{
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		Transferable transferable = new StringSelection(text);
+		clipboard.setContents(transferable, null);
+	}
+	/**
+	 * Pastes whatever is on the clipbaord into the JTextArea input.
+	 */
+	public void paste()
+	{
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		Transferable contents = clipboard.getContents(null);
+		boolean canTrans = (contents != null && 
+				contents.isDataFlavorSupported(DataFlavor.stringFlavor));
+		if(canTrans)
+		{
+			try 
+			{
+				cont = (String) contents.getTransferData(DataFlavor.stringFlavor);
+			}
+			catch(UnsupportedFlavorException except)
+			{
+			}
+			catch(IOException except)
+			{
+			}
+		}
+		clearen();
+		cleardec();
+		input.setText(cont);
+	}
+	/**
+	 * Checks to see if the input trying to be decrypted is of acceptable format.
+	 */
+	public boolean checkacceptNums()
+	{
+		numPass = false;
+		wordPass = true;
+		for(int j = 0; j < input.getText().length(); j++ )
+		{
+			for(int o = 0; o < 12; o++)
+			{
+				if(input.getText().substring(j,j+1).equals(acceptNums[o]))
+					numPass = true;
+			}
+			if(!numPass)
+			{
+				wordPass = false;
+				numPass = false;
+			}
+			else
+				numPass = false;
+		}
+		if(!wordPass)
+			return false;
+		else
+			return true;
+	}
+}
