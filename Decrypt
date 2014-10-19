@@ -1,0 +1,102 @@
+/**
+ * Called only from the GUI class that takes a string of encrypted data and decrypts it 
+ * into the letters/numbers/characters that were in the password. 
+ */
+package thiss;
+import java.lang.Character;
+import java.util.ArrayList;
+import java.lang.String;
+import java.lang.Integer;
+public class Decrypt
+{
+	String encData, num3, num4;
+	ArrayList<String> data = new ArrayList<String>();
+	ArrayList<Integer> inData = new ArrayList<Integer>();
+	ArrayList<Double> decInData = new ArrayList<Double>();
+	ArrayList<Integer> roundDecInData = new ArrayList<Integer>();
+	ArrayList<Character> decData = new ArrayList<Character>();
+	ArrayList<Character> last = new ArrayList<Character>();
+	int num, length, place, keyy;
+	int[] datta;
+	char[] ch = new char[1];
+	char chr;
+	public String word, letter,key;
+	public static void main (String[] args)
+	{
+	}
+	/**
+	 * Gets Arraylist of of numbers in string form. Saves the two part strings in Arraylist data.
+	 */
+	public void getData(String encData)
+	{
+		length = encData.length();
+		key = encData.substring((encData.length()/2)-1,encData.length()/2+1);
+		keyy = Integer.parseInt(key);
+		if(keyy < 50)
+		{
+			for(int a = 0; a < (length-4)/2; a++)
+				data.add(a, encData.substring((length - a) - 1,
+						(length - a)) + encData.substring(a ,a + 1));
+			num3 = encData.substring((length/2)+1,(length/2)+2) + 
+					encData.substring((length/2)-2,(length/2)-1);
+		}
+		if(keyy >= 50)
+		{
+			for(int a = 0; a < (length-4)/2; a++)
+				data.add(a, encData.substring(a ,a + 1) + 
+						encData.substring((length - a) - 1,(length - a)));	
+			num3 = encData.substring((length/2)-2,(length/2)-1) + 
+					encData.substring((length/2)+1,(length/2)+2);
+		}
+	}
+	/**
+	 * Parses Arraylist data of strings to Integers and then applies the Decryption algorithm to them. 
+	 * Saves the decrypted Integers in Arraylist decInData.
+	 */
+	public void numData()
+	{
+		place = Integer.parseInt(num3);
+		for(int b = 0; b < data.size(); b++)
+			inData.add(Integer.parseInt(data.get(b)));
+		for(int c = 0; c < inData.size(); c++)
+		{
+			if((double) inData.get(c) + 40 == 32)
+				decInData.add( (double) inData.get(c) + 40);		
+			else
+				decInData.add( (double) inData.get(c) + place);
+		}
+		datta = new int[decInData.size()];	
+	}
+	/**
+	 * Rounds the the data to the Integer value. Saves the rounded data into Arraylist datta.
+	 */
+	public void roundData()
+	{
+		for(int d = 0; d < decInData.size(); d++)
+		{
+			roundDecInData.add((decInData.get(d).intValue()));
+			datta[d] = decInData.get(d).intValue();
+		}	
+	}
+	/**
+	 * Changes the Integers into an Array of chars representing the integer codepoint of the char. 
+	 * Then parses the chars into strings and combines the strings of singular characters into
+	 * a long string of the original password.
+	 */
+	public void dispData()
+	{
+		word = "";
+		letter = "";
+		for(int f = 0; f < roundDecInData.size(); f++)
+		{			
+			ch = Character.toChars(datta[f]);
+			chr = ch[0];
+			last.add(f, chr);		
+		}	
+		for(int g = 0; g < last.size(); g++)
+		{
+			letter = Character.toString(last.get(g));
+			word = word + letter;
+		}
+	}
+}
