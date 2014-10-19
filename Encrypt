@@ -1,0 +1,129 @@
+/**
+ * Calls the GUI class and then gets input from the GUI calls and runs an algorithm on the data.
+ */
+package thiss;
+import java.lang.Character;
+import java.util.ArrayList;
+import java.lang.String;
+import java.lang.Integer;
+public class Encrypt
+{
+	String password;
+	char[] letters;
+	char[] passw;
+	int place, stopCollaborateAndListen;
+	int[] subtract = new int[] {27, 28, 29, 30, 31, 32, 33};
+	int num; //This is a num
+	String num2, num3; //This is a num 2
+	ArrayList<String> pass = new ArrayList<String>();
+	public String pass2 = "";
+	/**
+	 * Calls the GUI class.
+	 */
+	public static void main (String[] args)
+	{
+		new GUI();
+	}
+	/**
+	 * Receives the string for the password from the GUI class and sets to the local variable 
+	 * password.
+	 */
+	public void getPass(String passwordin)
+	{
+		password = passwordin;
+	}
+	/**
+	 * Randomly selects integer "place" which will be used to select a integer from array
+	 * subtract which is the number the codepoints of the characters in the string are 
+	 * subtracted by as part of the algorithm. Gets the key code "stopCollaborateAndListen"
+	 * if this number is less than 50 the numbers; digits are flipped when put into the arraylist
+	 * pass, and if the number is greater than 50 the digits are not flipped when entered in the 
+	 * array. Then adds the subtracted number into the center of the array and then the 
+	 * stopCollaborateAndListen number is entered into the center of the array.
+	 */
+	public void encPass()
+	{
+		place = (int) ((Math.random() * 8) - 1);
+		stopCollaborateAndListen = (int) ((Math.random() * 100) - 1);
+		if(stopCollaborateAndListen < 50)
+		{
+			for(int a = 0; a < password.length(); a++)
+			{
+				if(Character.isWhitespace(password.codePointAt(a)))
+					num = password.codePointAt(a)-40;			
+				else  
+					num = password.codePointAt(a) - (subtract[place]);
+				num2 = Integer.toString(num);
+				num3 = Integer.toString(stopCollaborateAndListen);
+				if(num < 10 && !Character.isWhitespace(password.codePointAt(a)))
+				{
+					pass.add(a,num2);
+					pass.add(a+1,"0");
+				}
+				else
+				{
+					//HI NSA
+					pass.add(a,num2.substring(1));
+					pass.add(a+1,num2.substring(0,1));
+				}
+			}
+			num2 = Integer.toString((subtract[place]));
+			pass.add(password.length(),num2.substring(1));
+			if(stopCollaborateAndListen < 10)
+			{
+				pass.add(password.length()+1, "0");
+				pass.add(password.length()+2, num3);
+			}
+			else 
+			{
+				pass.add(password.length()+1, num3.substring(0,1));
+				pass.add(password.length()+2, num3.substring(1));
+			}
+			pass.add(password.length()+3,num2.substring(0,1));
+		}
+		if(stopCollaborateAndListen >= 50)
+		{
+			for(int a = 0; a < password.length(); a++)
+			{
+				if(Character.isWhitespace(password.codePointAt(a)))
+					num = (password.codePointAt(a)-40);			
+				else  
+					num = password.codePointAt(a) - (subtract[place]);
+				num2 = Integer.toString(num);
+				num3 = Integer.toString(stopCollaborateAndListen);
+				if(num < 10 && !Character.isWhitespace(password.codePointAt(a)))
+				{
+					pass.add(a,"0");
+					pass.add(a+1,num2);
+				}
+				else
+				{
+					//HI NSA
+					pass.add(a,num2.substring(0,1));
+					pass.add(a+1,num2.substring(1));
+				}
+			}
+			num2 = Integer.toString((subtract[place]));
+			pass.add(password.length(),num2.substring(0,1));
+			if(stopCollaborateAndListen < 10)
+			{
+				pass.add(password.length()+1, "0");
+				pass.add(password.length()+2, num3);
+			}
+			else 
+			{
+				pass.add(password.length()+1, num3.substring(0,1));
+				pass.add(password.length()+2, num3.substring(1));
+			}
+			pass.add(password.length()+3,num2.substring(1));
+		}
+	}
+	/**
+	 * Combines all the string parts of the array pass into one long string pass2.
+	 */
+	public void printPass()
+	{
+		for(int b = 0; b < pass.size(); b++)
+			pass2 = pass2 + pass.get(b);
+	}
+}
